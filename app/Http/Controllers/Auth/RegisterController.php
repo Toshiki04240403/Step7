@@ -23,12 +23,28 @@ class RegisterController extends Controller
 
     use RegistersUsers;
 
+    // 他のメソッド...
+
+    /**
+     * ユーザー登録後の処理をカスタマイズするためのメソッド
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user 新規登録ユーザー
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    protected function registered(Request $request, $user)
+    {
+        // 登録後はユーザーを自動的にログインさせず、ログイン画面にリダイレクトさせる
+        return redirect('/login')->with('status', '登録が完了しました。ログインしてください。');
+    }
+
+
     /**
      * Where to redirect users after registration.
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/login';
 
     /**
      * Create a new controller instance.
@@ -49,7 +65,7 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
+           
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -64,7 +80,7 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
+           
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
