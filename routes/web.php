@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController; 
 use App\Http\Controllers\ProductController;
 
 /*
@@ -17,7 +18,13 @@ use App\Http\Controllers\ProductController;
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/login', 'App\Http\Controllers\Auth\LoginController@showLoginForm')->name('login');
+
+// 既存のGETメソッドでのログインルート
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
+// POSTメソッドでのログインルートを追加
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
 Route::resource('products', ProductController::class);
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/sales', [ProductController::class, 'showsales'])->name('sales.show');
