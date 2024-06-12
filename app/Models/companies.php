@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+
 class Article extends Model
 {
     public function getList() {
@@ -12,5 +15,16 @@ class Article extends Model
         $articles = DB::table('companies')->get();
 
         return $articles;
+    }
+}
+
+class Company extends Model
+{
+    use HasFactory;
+    
+    // Productモデルとのリレーションを定義
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 }

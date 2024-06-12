@@ -107,22 +107,22 @@
         }
     </style>
 </head>
+</head>
 <body>
     <h1>商品一覧</h1>
 
     <div class="search-container">
         <form action="{{ route('products.index') }}" method="GET">
             <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
-            <button type="submit">検索</button>
-        </form>
-        <form action="{{ route('products.index') }}" method="GET">
-            <select name="maker" onchange="this.form.submit()">
-                <option value="">メーカーでソート</option>
-                <!-- ここにメーカーのオプションを追加 -->
-                <option value="maker1">メーカー1</option>
-                <option value="maker2">メーカー2</option>
-                <!-- 他のメーカーのオプション -->
+            <select name="company_id">
+                <option value="">全てのメーカー</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
+                        {{ $company->name }}
+                    </option>
+                @endforeach
             </select>
+            <button type="submit">検索</button>
         </form>
     </div>
 
@@ -139,7 +139,6 @@
                         <button type="submit" class="new-registration">新規登録</button>
                 </form></th>
             </tr>
-
         </thead>
         <tbody>
             @foreach ($products as $product)

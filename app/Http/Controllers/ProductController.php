@@ -4,16 +4,52 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\companies;
 
 class ProductController extends Controller
-{
-    /**
-     * 販売ページの表示
-     */
-    public function showsales()
+{   
+    public function store(Request $request)
     {
-        return view('sales');
+        // バリデーションを実施
+        $validated = $request->validate([
+            'product_name' => 'required|max:255',
+            'manufacturer_name' => 'required|max:255',
+            'price' => 'required|numeric',
+            'stock' => 'required|numeric',
+            'comment' => 'nullable',
+            'product_image' => 'nullable|image|max:2048', // 画像ファイルがある場合、画像に対するバリデーションを指定
+        ]);
+
+        // Productモデルを使用してデータベースに新しい商品を登録
+        $product = new Product();
+        $product->product_name = $request->product_name;
+        $product->manufacturer_name = $request->manufacturer_name;
+        $product->price = $request->price;
+        $product->stock = $request->stock;
+        $product->comment = $request->comment;
+
+        // 画像ファイルが存在する場合の処理
+        if ($request->hasFile('product_image')) {
+            $path = $request->file('product_image')->store('public/products');
+            $product->product_image = basename($path);
+        }
+
+        $product->save(); // データベースに保存
+
+        // 商品リストページなど、適切なページにリダイレクト
+        // データベースへの保存処理後
+        return redirect()->route('sales.view')->with('success', '商品が正常に登録されました。');
+
     }
+
+    public function showSalesView()
+    {
+
+            return view('sales', []);
+    }
+
+
+    
 
 
     /**
@@ -23,26 +59,31 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
-        // Productモデルのクエリビルダを初期化
-        $query = Product::query();
+{
+    $query = Product::query();
 
-        // 検索機能
-        if ($request->has('search') && !empty($request->input('search'))) {
-            $query->where('product_name', 'like', '%' . $request->input('search') . '%');
-        }
-
-        // メーカー別ソート機能
-        if ($request->has('maker') && !empty($request->input('maker'))) {
-            $query->where('maker', $request->input('maker'));
-        }
-
-        // クエリビルダを実行して結果を取得
-        $products = $query->get();
-
-        // 結果をビューに渡して表示
-        return view('list', ['products' => $products]);
+    // 検索条件
+    if ($search = $request->input('search')) {
+        $query->where('product_name', 'like', "%{$search}%");
     }
+
+    if ($companyId = $request->input('company_id')) {
+        $query->where('company_id', $companyId);
+    }
+
+    // ソート条件
+    if ($request->input('sort') == 'company_name') {
+            $query->join('companies', 'products.company_id', '=', 'companies.id')
+                  ->orderBy('companies.name')
+                  ->select('products.*'); // 重要: selectを指定しないとカラムが競合する可能性があります
+        }
+
+        $products = $query->get();
+        $companies = Product::all();
+
+    return view('list', compact('products', 'companies'));
+}
+
         public function show($id)
     {
         $product = Product::findOrFail($id);

@@ -78,8 +78,8 @@
             <input type="text" id="product-name" name="product_name" required>
         </div>
         <div class="form-group">
-            <label for="manufacturer-name">メーカー名：</label>
-            <input type="text" id="manufacturer-name" name="manufacturer_name" required>
+            <label for="company_id">メーカー名：</label>
+            <input type="text" id="company_id" name="company_id" required>
         </div>
         <div class="form-group">
             <label for="price">価格：</label>
@@ -91,11 +91,11 @@
         </div>
         <div class="form-group">
             <label for="comment">コメント：</label>
-            <textarea id="comment" name="comment" rows="4" required></textarea>
+            <textarea id="comment" name="comment" rows="4" ></textarea>
         </div>
         <div class="form-group">
             <label for="product-image">商品画像：</label>
-            <input type="file" id="product-image" name="product_image" accept="image/*" required>
+            <input type="file" id="product-image" name="product_image" accept="image/*" >
         </div>
         <br>
         <div class="button-group">
