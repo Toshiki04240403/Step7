@@ -87,45 +87,26 @@
         form.inline {
             display: inline;
         }
-
-
-        .button-style {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-            .button-style:hover {
-            background-color: #0056b3;
-        }
     </style>
-</head>
 </head>
 <body>
     <h1>商品一覧</h1>
 
-    <div class="search-container">
+     <div class="search-container">
         <form action="{{ route('products.index') }}" method="GET">
             <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
-            <select name="company_id">
-                <option value="">全てのメーカー</option>
-                @foreach($companies as $company)
-                    <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
-                        {{ $company->name }}
-                    </option>
+            <select name="company_name">
+                <option value="all">全てのメーカー</option>
+                @foreach ($companies as $company)
+                <option value="{{ $company->company_name }}" {{ request('company_name') == $company->company_name ? 'selected' : '' }}>
+                {{ $company->company_name }}
+                </option>
                 @endforeach
             </select>
             <button type="submit">検索</button>
         </form>
     </div>
-
+    
     <table>
         <thead>
             <tr>
@@ -141,6 +122,7 @@
             </tr>
         </thead>
         <tbody>
+            
             @foreach ($products as $product)
                 <tr>
                     <td>{{ $product->id }}</td>
@@ -159,6 +141,7 @@
                     </td>
                 </tr>
             @endforeach
+
         </tbody>
     </table>
 </body>

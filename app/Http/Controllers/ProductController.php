@@ -4,10 +4,39 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\companies;
+use App\Models\Company;
 
 class ProductController extends Controller
 {   
+
+        public function index(Request $request)
+    {
+        
+
+    
+        $query = Product::query();
+
+        // 検索機能
+        if ($request->filled('search')) {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        // メーカーでのフィルタリング
+        if ($request->filled('company_name') && $request->company_name != '全てのメーカー') {
+        $query->whereHas('company', function ($query) use ($request) {
+            $query->where('company_name', $request->company_name);
+        })->with(['company' => function ($query) {
+            $query->orderBy('company_name', 'asc');
+        }]);
+    }
+
+        $products = $query->get();
+        $companies = Company::all();
+        
+
+        return view('list', compact('products', 'companies'));
+    }
+
     public function store(Request $request)
     {
         // バリデーションを実施
@@ -48,42 +77,6 @@ class ProductController extends Controller
             return view('sales', []);
     }
 
-
-    
-
-
-    /**
-     * 商品リストの表示
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
-{
-    $query = Product::query();
-
-    // 検索条件
-    if ($search = $request->input('search')) {
-        $query->where('product_name', 'like', "%{$search}%");
-    }
-
-    if ($companyId = $request->input('company_id')) {
-        $query->where('company_id', $companyId);
-    }
-
-    // ソート条件
-    if ($request->input('sort') == 'company_name') {
-            $query->join('companies', 'products.company_id', '=', 'companies.id')
-                  ->orderBy('companies.name')
-                  ->select('products.*'); // 重要: selectを指定しないとカラムが競合する可能性があります
-        }
-
-        $products = $query->get();
-        $companies = Product::all();
-
-    return view('list', compact('products', 'companies'));
-}
-
         public function show($id)
     {
         $product = Product::findOrFail($id);
@@ -111,7 +104,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'product_name' => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
+            'company_id' => 'required|string|max:255',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
             'comment' => 'nullable|string',
@@ -120,7 +113,7 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
         $product->product_name = $request->input('product_name');
-        $product->company_id = $request->input('company_name');
+        $product->company_id = $request->input('company_id');
         $product->price = $request->input('price');
         $product->stock = $request->input('stock');
         $product->comment = $request->input('comment');
