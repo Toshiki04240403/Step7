@@ -9,11 +9,9 @@ use App\Models\Company;
 class ProductController extends Controller
 {   
 
-        public function index(Request $request)
+       
+       public function index(Request $request)
     {
-        
-
-    
         $query = Product::query();
 
         // 検索機能
@@ -21,21 +19,23 @@ class ProductController extends Controller
             $query->where('product_name', 'like', '%' . $request->search . '%');
         }
 
-        // メーカーでのフィルタリング
+        // メーカーでのフィルタリングと並び替え
         if ($request->filled('company_name') && $request->company_name != '全てのメーカー') {
-        $query->whereHas('company', function ($query) use ($request) {
-            $query->where('company_name', $request->company_name);
-        })->with(['company' => function ($query) {
-            $query->orderBy('company_name', 'asc');
-        }]);
-    }
+            $company = Company::where('company_name', $request->company_name)->first();
+            if ($company) {
+                $query->orderByRaw("FIELD(company_id, ?) DESC", [$company->id]);
+            }
+        }
 
-        $products = $query->get();
-        $companies = Company::all();
-        
+        // 関連する会社データを含めて取得
+        $query->with('company');
 
-        return view('list', compact('products', 'companies'));
-    }
+        // 全ての製品を取得
+    $products = $query->get();
+    $companies = Company::all();
+
+    return view('list', compact('products', 'companies'));
+}
 
     public function store(Request $request)
     {
