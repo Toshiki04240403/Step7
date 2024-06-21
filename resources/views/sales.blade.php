@@ -21,6 +21,7 @@
     h2 {
         text-align: center;
         color: #333;
+        margin-bottom: 20px;
     }
     .form-group {
         margin-bottom: 15px;
@@ -31,9 +32,10 @@
         color: #333;
     }
     .form-group input,
-    .form-group textarea {
+    .form-group textarea,
+    .form-group select {
         width: 100%;
-        padding: 8px;
+        padding: 10px;
         box-sizing: border-box;
         border: 1px solid #ccc;
         border-radius: 4px;
@@ -44,6 +46,7 @@
     .button-group {
         display: flex;
         justify-content: space-between;
+        margin-top: 20px;
     }
     button {
         display: inline-block;
@@ -53,6 +56,7 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        font-size: 16px;
     }
     button[type="button"] {
         background-color: #6c757d;
@@ -79,7 +83,11 @@
         </div>
         <div class="form-group">
             <label for="company_id">メーカー名：</label>
-            <input type="text" id="company_id" name="company_id" required>
+            <select id="company_id" name="company_id" required>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}">{{ $company->company_name }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="form-group">
             <label for="price">価格：</label>
@@ -91,20 +99,17 @@
         </div>
         <div class="form-group">
             <label for="comment">コメント：</label>
-            <textarea id="comment" name="comment" rows="4" ></textarea>
+            <textarea id="comment" name="comment" rows="4"></textarea>
         </div>
         <div class="form-group">
             <label for="product-image">商品画像：</label>
-            <input type="file" id="product-image" name="product_image" accept="image/*" >
+            <input type="file" id="product-image" name="product_image" accept="image/*">
         </div>
-        <br>
         <div class="button-group">
             <button type="submit">新規登録</button>
-            </form>
-            <form action="{{ route('products.index') }}" method="GET" style="display:inline;">
-                <button type="submit" class="back">戻る</button>
-            </form>
+            <button type="button" class="back" onclick="window.location.href='{{ route('products.index') }}'">戻る</button>
         </div>
+    </form>
 </div>
 
 </body>

@@ -47,3 +47,7 @@ Route::post('/sales', [ProductController::class, 'store'])->name('sales.index');
 // 新規登録後のリダイレクト
 Route::get('/sales', [ProductController::class, 'showSalesView'])->name('sales.view');
 
+
+
+Route::get('/sales', [ProductController::class, 'create'])->name('products.create');
+

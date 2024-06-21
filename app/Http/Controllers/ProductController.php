@@ -35,7 +35,19 @@ class ProductController extends Controller
     $companies = Company::all();
 
     return view('list', compact('products', 'companies'));
-}
+    }
+
+        public function create()
+    {
+        // companiesテーブルから全てのcompany_nameを取得
+        $companies = Company::all();
+
+        // salesビューにデータを渡す
+        return view('sales', compact('companies'));
+    }
+
+
+
 
     public function store(Request $request)
     {
