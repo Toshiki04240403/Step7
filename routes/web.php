@@ -44,6 +44,6 @@ Route::view('/home', 'home');
 
 //新規登録ルート
 Route::post('/sales', [ProductController::class, 'store'])->name('sales.index');
-//新規登録後のリダイレクト
-Route::get('/sales-view', 'ProductController@showSalesView')->name('sales.view');
+// 新規登録後のリダイレクト
+Route::get('/sales', [ProductController::class, 'showSalesView'])->name('sales.view');
 

@@ -42,8 +42,8 @@ class ProductController extends Controller
         // バリデーションを実施
         $validated = $request->validate([
             'product_name' => 'required|max:255',
-            'manufacturer_name' => 'required|max:255',
-            'price' => 'required|numeric',
+            'company_id' => 'required|max:255',
+            'price' => 'required|integer',
             'stock' => 'required|numeric',
             'comment' => 'nullable',
             'product_image' => 'nullable|image|max:2048', // 画像ファイルがある場合、画像に対するバリデーションを指定
@@ -52,7 +52,7 @@ class ProductController extends Controller
         // Productモデルを使用してデータベースに新しい商品を登録
         $product = new Product();
         $product->product_name = $request->product_name;
-        $product->manufacturer_name = $request->manufacturer_name;
+        $product->company_id = $request->company_id;
         $product->price = $request->price;
         $product->stock = $request->stock;
         $product->comment = $request->comment;
@@ -74,7 +74,7 @@ class ProductController extends Controller
     public function showSalesView()
     {
 
-            return view('sales', []);
+            return view('sales');
     }
 
         public function show($id)
@@ -105,7 +105,7 @@ class ProductController extends Controller
         $request->validate([
             'product_name' => 'required|string|max:255',
             'company_id' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|integer',
             'stock' => 'required|numeric',
             'comment' => 'nullable|string',
             'image_path' => 'nullable|image|max:2048'
