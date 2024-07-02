@@ -95,11 +95,11 @@
      <div class="search-container">
         <form action="{{ route('products.index') }}" method="GET">
             <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
-            <select name="company_name">
-                <option value="all">全てのメーカー</option>
-                @foreach ($companies as $company)
-                <option value="{{ $company->company_name }}" {{ request('company_name') == $company->company_name ? 'selected' : '' }}>
-                {{ $company->company_name }}
+            <select name="company_id">
+                <option value="">全てのメーカー</option>
+                @foreach ($companies as $id => $company_name)
+                <option value="{{ $id }}" {{ request('company_id') == $id ? 'selected' : '' }}>
+                {{ $company_name }}
                 </option>
                 @endforeach
             </select>
@@ -130,7 +130,7 @@
                     <td>{{ $product->product_name }}</td>
                     <td>{{ $product->price }}円</td>
                     <td>{{ $product->stock }}本</td>
-                    <td>{{ $product->company_id }}</td>
+                    <td>{{ $product->company->company_name }}</td>
                     <td>
                         <button class="details" onclick="location.href='{{ url('/products/' . $product->id) }}'">詳細</button>
                         <form class="inline" action="{{ route('products.destroy', $product->id) }}" method="POST">

@@ -34,6 +34,11 @@
             padding: 8px;
             box-sizing: border-box;
         }
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
         .form-group img {
             max-width: 100%;
             height: auto;
@@ -80,9 +85,16 @@
         </div>
         
         <div class="form-group">
-            <label for="company_name">メーカー名:</label>
-            <input type="text" id="company_name" name="company_name" value="{{ old('company_name', $product->company_id) }}">
-        </div>
+                <label for="company_name">メーカー名:</label>
+                    <select id="company_name" name="company_name">
+                    <option value="">メーカーを選択してください</option>
+                        @foreach ($companies as $company)
+                        <option value="{{ $company->company_name }}" {{ old('company_name', $product->company->company_name) == $company->company_name ? 'selected' : '' }}>
+                        {{ $company->company_name }}
+                        </option>
+                        @endforeach
+                </select>
+            </div>
         
         <div class="form-group">
             <label for="price">価格:</label>

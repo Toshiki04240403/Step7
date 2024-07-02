@@ -18,6 +18,7 @@ use App\Http\Controllers\ProductController;
 //リソースルートの定義
 Route::resource('products', ProductController::class);
 
+
 // 商品リストの表示
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 

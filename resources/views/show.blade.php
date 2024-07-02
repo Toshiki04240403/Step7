@@ -70,7 +70,7 @@
         </div>
         <div>
             <strong>メーカー名：</strong>
-            <span>{{ $product->company_id }}</span>
+            <span>{{ $product->company->company_name }}</span>
         </div>
         <div>
             <strong>価格：</strong>

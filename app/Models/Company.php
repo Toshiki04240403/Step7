@@ -14,6 +14,12 @@ class Company extends Model
         'company_name',
     ];
 
+    public function getLists()
+{
+    $companies = Company::pluck('company_name', 'id');
+    return $companies;
+}
+
     public function products()
     {
         return $this->hasMany(Product::class);

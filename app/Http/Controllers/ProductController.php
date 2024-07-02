@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Company;
+use App\Http\Requests\ArticleRequest;
 
 class ProductController extends Controller
 {   
@@ -12,29 +13,28 @@ class ProductController extends Controller
        
        public function index(Request $request)
     {
+        $search = $request->input('search');
+        $companyName = $request->input('company_id');
+
         $query = Product::query();
 
-        // 検索機能
-        if ($request->filled('search')) {
-            $query->where('product_name', 'like', '%' . $request->search . '%');
+
+        if (isset($search)){
+            $query->where('product_name', 'like', '%'.$search. '%');
         }
 
-        // メーカーでのフィルタリングと並び替え
-        if ($request->filled('company_name') && $request->company_name != '全てのメーカー') {
-            $company = Company::where('company_name', $request->company_name)->first();
-            if ($company) {
-                $query->orderByRaw("FIELD(company_id, ?) DESC", [$company->id]);
+        if (isset($companyName)) {
+            if ($companyName !== "all") {
+            $query->where('company_id', $companyName);
             }
         }
 
-        // 関連する会社データを含めて取得
-        $query->with('company');
+        $products = $query->with('company')->orderBy('id', 'asc')->paginate(15);
 
-        // 全ての製品を取得
-    $products = $query->get();
-    $companies = Company::all();
+    
+        $companies = Company::pluck('company_name', 'id')->toArray();
 
-    return view('list', compact('products', 'companies'));
+        return view('list', compact('products', 'companies'));
     }
 
         public function create()
@@ -49,30 +49,24 @@ class ProductController extends Controller
 
 
 
-    public function store(Request $request)
+    public function store(ArticleRequest $request)
     {
+        
         // バリデーションを実施
-        $validated = $request->validate([
-            'product_name' => 'required|max:255',
-            'company_id' => 'required|max:255',
-            'price' => 'required|integer',
-            'stock' => 'required|numeric',
-            'comment' => 'nullable',
-            'product_image' => 'nullable|image|max:2048', // 画像ファイルがある場合、画像に対するバリデーションを指定
-        ]);
+        $validated = $request->validated();
 
         // Productモデルを使用してデータベースに新しい商品を登録
-        $product = new Product();
-        $product->product_name = $request->product_name;
-        $product->company_id = $request->company_id;
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->comment = $request->comment;
+         $product = new Product();
+        $product->product_name = $validated['product_name'];
+        $product->company_id = $validated['company_id'];
+        $product->price = $validated['price'];
+        $product->stock = $validated['stock'];
+        $product->comment = $validated['comment'];
 
         // 画像ファイルが存在する場合の処理
         if ($request->hasFile('product_image')) {
             $path = $request->file('product_image')->store('public/products');
-            $product->product_image = basename($path);
+            $product->img_path = basename($path);
         }
 
         $product->save(); // データベースに保存
@@ -108,27 +102,48 @@ class ProductController extends Controller
     public function edit($id)
     {
         $product = Product::findOrFail($id);
-        return view('edit', compact('product'));
+        $companies = Company::all();
+        return view('edit', compact('product','companies'));
     }
-
-    // 商品情報を更新するメソッド
-    public function update(Request $request, $id)
+    public function update(ArticleRequest $request, $id)
     {
-        $request->validate([
-            'product_name' => 'required|string|max:255',
-            'company_id' => 'required|string|max:255',
-            'price' => 'required|integer',
-            'stock' => 'required|numeric',
-            'comment' => 'nullable|string',
-            'image_path' => 'nullable|image|max:2048'
-        ]);
+        // バリデーション
+        $validated = $request->validated();
+
+        // 商品を取得
+        $product = Product::findOrFail($id);
+        // データの更新
+        $product->update($validated);
+        
+
+        // 画像のアップロード処理
+        if ($request->hasFile('image_path')) {
+            $imagePath = $request->file('image_path')->store('images', 'public');
+            $product->image_path = $imagePath;
+
+            // データベースに保存
+            $product->save();
+        }
+
+        
+
+        // リダイレクト
+        return redirect()->route('products.show', $product->id)->with('success', '商品情報を更新しました。');
+    }
+    // 商品情報を更新するメソッド
+    /*public function update(ArticleRequest $request, $id)
+    {
+        // バリデーションを実施
+        $validated = $request->validated();
 
         $product = Product::findOrFail($id);
-        $product->product_name = $request->input('product_name');
-        $product->company_id = $request->input('company_id');
-        $product->price = $request->input('price');
-        $product->stock = $request->input('stock');
-        $product->comment = $request->input('comment');
+
+
+        $product->product_name = $validated['product_name'];
+        $product->company_id = $validated['company_id'];
+        $product->price = $validated['price'];
+        $product->stock = $validated['stock'];
+        $product->comment = $validated['comment'];
 
         if ($request->hasFile('image_path')) {
             $path = $request->file('image_path')->store('public');
@@ -139,6 +154,7 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', '商品情報が更新されました。');
     }
+        */
 }
 
 
