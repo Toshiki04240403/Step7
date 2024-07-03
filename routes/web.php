@@ -27,6 +27,7 @@ Route::get('/sales', [ProductController::class, 'showsales'])->name('sales.index
 
 // 詳細ページの表示
 Route::get('/show', [ProductController::class, 'show'])->name('show.index');
+
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
 // 会員登録ページの表示
@@ -47,8 +48,6 @@ Route::view('/home', 'home');
 Route::post('/sales', [ProductController::class, 'store'])->name('sales.index');
 // 新規登録後のリダイレクト
 Route::get('/sales', [ProductController::class, 'showSalesView'])->name('sales.view');
-
-
 
 Route::get('/sales', [ProductController::class, 'create'])->name('products.create');
 

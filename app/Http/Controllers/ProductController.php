@@ -64,8 +64,8 @@ class ProductController extends Controller
         $product->comment = $validated['comment'];
 
         // 画像ファイルが存在する場合の処理
-        if ($request->hasFile('product_image')) {
-            $path = $request->file('product_image')->store('public/products');
+        if ($request->hasFile('img_path')) {
+            $path = $request->file('img_path')->store('public/products');
             $product->img_path = basename($path);
         }
 
@@ -105,10 +105,51 @@ class ProductController extends Controller
         $companies = Company::all();
         return view('edit', compact('product','companies'));
     }
+
+
+
+    public function update(ArticleRequest $request, $id)
+{
+    try {
+        $product = Product::findOrFail($id);
+
+        // 画像アップロードの処理
+        if ($request->hasFile('img_path')) {
+            $imagePath = $request->file('img_path')->store('images', 'public');
+            $product->img_path = $imagePath;
+        }
+
+        $product->fill($request->validated());
+        // company_idを設定
+        $product->company_id = $request->input('company_id');
+
+        $product->save();
+
+        return redirect()->route('products.show', $product->id)->with('success', '商品情報を更新しました。');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // バリデーションエラーの処理
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        // その他のエラーの処理
+        dd($e->getMessage());
+    }
+}
+
+
+
+
+
+
+
+
+    /*
     public function update(ArticleRequest $request, $id)
     {
+
+        // バリデーションデータの確認
+        dd($request->validated());
         // バリデーション
-        $validated = $request->validated();
+        //$validated = $request->validated();
 
         // 商品を取得
         $product = Product::findOrFail($id);
@@ -117,9 +158,9 @@ class ProductController extends Controller
         
 
         // 画像のアップロード処理
-        if ($request->hasFile('image_path')) {
-            $imagePath = $request->file('image_path')->store('images', 'public');
-            $product->image_path = $imagePath;
+        if ($request->hasFile('img_path')) {
+            $imgPath = $request->file('img_path')->store('imges', 'public');
+            $product->img_path = $imgPath;
 
             // データベースに保存
             $product->save();
@@ -129,32 +170,8 @@ class ProductController extends Controller
 
         // リダイレクト
         return redirect()->route('products.show', $product->id)->with('success', '商品情報を更新しました。');
-    }
-    // 商品情報を更新するメソッド
-    /*public function update(ArticleRequest $request, $id)
-    {
-        // バリデーションを実施
-        $validated = $request->validated();
-
-        $product = Product::findOrFail($id);
-
-
-        $product->product_name = $validated['product_name'];
-        $product->company_id = $validated['company_id'];
-        $product->price = $validated['price'];
-        $product->stock = $validated['stock'];
-        $product->comment = $validated['comment'];
-
-        if ($request->hasFile('image_path')) {
-            $path = $request->file('image_path')->store('public');
-            $product->image_path = basename($path);
-        }
-
-        $product->save();
-
-        return redirect()->route('products.index')->with('success', '商品情報が更新されました。');
-    }
-        */
+    }*/
+    
 }
 
 

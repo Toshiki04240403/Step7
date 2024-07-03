@@ -85,11 +85,11 @@
         </div>
         
         <div class="form-group">
-                <label for="company_name">メーカー名:</label>
-                    <select id="company_name" name="company_name">
+                <label for="company_id">メーカー名:</label>
+                    <select id="company_id" name="company_id">
                     <option value="">メーカーを選択してください</option>
-                        @foreach ($companies as $company)
-                        <option value="{{ $company->company_name }}" {{ old('company_name', $product->company->company_name) == $company->company_name ? 'selected' : '' }}>
+                         @foreach ($companies as $company)
+                        <option value="{{ $company->id }}" {{ old('company_id', $product->company_id) == $company->id ? 'selected' : '' }}>
                         {{ $company->company_name }}
                         </option>
                         @endforeach
@@ -112,10 +112,10 @@
         </div>
         
         <div class="form-group">
-            <label for="image_path">商品画像:</label>
-            <input type="file" id="image_path" name="image_path">
-            @if($product->image_path)
-                <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->product_name }}">
+            <label for="img_path">商品画像:</label>
+            <input type="file" id="img_path" name="img_path">
+            @if($product->img_path)
+                <img src="{{ asset('storage/' . $product->img_path) }}" alt="{{ $product->product_name }}">
             @endif
         </div>
         

@@ -52,7 +52,7 @@
     .button-edit:hover {
         background-color: #218838;
     }
-    .product-image img {
+    .img_path img {
         max-width: 100%;
         height: auto;
     }
@@ -84,10 +84,10 @@
             <strong>コメント：</strong>
             <p>{{ $product->comment }}</p>
         </div>
-        <div class="product-image">
+        <div class="img_path">
             <strong>商品画像：</strong>
-            @if($product->image_path)
-                <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->product_name }}">
+            @if($product->img_path)
+                <img src="{{ asset('storage/' . $product->img_path) }}" alt="{{ $product->product_name }}">
             @else
                 <p>画像がありません。</p>
             @endif

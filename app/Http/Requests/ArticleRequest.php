@@ -31,17 +31,12 @@ class ArticleRequest extends FormRequest
             'price' => 'required|integer',
             'stock' => 'required|numeric',
             'comment' => 'nullable',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'company_name' => 'required|string|max:255',
+            'img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+          
             
             
         ];
     }
-    public function prepareForValidation()
-    {
-    $this->merge([
-        'company_id' => Company::where('company_name', $this->company_name)->firstOrFail()->id,
-    ]);
-    }
+    
    
 }
