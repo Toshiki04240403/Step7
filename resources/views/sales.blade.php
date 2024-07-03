@@ -102,8 +102,8 @@
             <textarea id="comment" name="comment" rows="4"></textarea>
         </div>
         <div class="form-group">
-            <label for="product-image">商品画像：</label>
-            <input type="file" id="product-image" name="product_image" accept="image/*">
+            <label for="img_path">商品画像</label>
+            <input type="file" name="img_path" id="img_path" >
         </div>
         <div class="button-group">
             <button type="submit">新規登録</button>

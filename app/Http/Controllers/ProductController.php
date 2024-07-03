@@ -52,36 +52,30 @@ class ProductController extends Controller
     public function store(ArticleRequest $request)
     {
         
-        // バリデーションを実施
-        $validated = $request->validated();
+        $validatedData = $request->validated();
 
-        // Productモデルを使用してデータベースに新しい商品を登録
-         $product = new Product();
-        $product->product_name = $validated['product_name'];
-        $product->company_id = $validated['company_id'];
-        $product->price = $validated['price'];
-        $product->stock = $validated['stock'];
-        $product->comment = $validated['comment'];
-
-        // 画像ファイルが存在する場合の処理
+        $product = new Product;
+        $product->company_id = $validatedData['company_id'];
+        $product->product_name = $validatedData['product_name'];
+        $product->price = $validatedData['price'];
+        $product->stock = $validatedData['stock'];
+        $product->comment = $validatedData['comment'];
         if ($request->hasFile('img_path')) {
-            $path = $request->file('img_path')->store('public/products');
-            $product->img_path = basename($path);
+            $file = $request->file('img_path');
+            $fileName = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images'), $fileName);
+            $product->img_path = 'images/' . $fileName;
+        }
+        $product->save();
+        return redirect()->route('products.index')->with('success', '新しい商品を追加しました');
+
         }
 
-        $product->save(); // データベースに保存
-
-        // 商品リストページなど、適切なページにリダイレクト
-        // データベースへの保存処理後
-        return redirect()->route('sales.view')->with('success', '商品が正常に登録されました。');
-
-    }
-
-    public function showSalesView()
-    {
+        public function showSalesView()
+        {
 
             return view('sales');
-    }
+        }
 
         public function show($id)
     {
