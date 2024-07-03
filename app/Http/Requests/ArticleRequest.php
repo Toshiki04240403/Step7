@@ -3,8 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Product;
-use App\Models\Company;
+
 
 class ArticleRequest extends FormRequest
 {
@@ -26,15 +25,12 @@ class ArticleRequest extends FormRequest
     public function rules()
     {
         return [
+            'company_id' => 'required|exists:companies,id',
             'product_name' => 'required|max:255',
-            'company_id' => 'required|numeric',
-            'price' => 'required|integer',
+            'price' => 'required|numeric',
             'stock' => 'required|numeric',
-            'comment' => 'nullable',
-            'img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-          
-            
-            
+            'comment' => 'nullable|max:1000',
+            'img_path' => 'nullable|image',
         ];
     }
     

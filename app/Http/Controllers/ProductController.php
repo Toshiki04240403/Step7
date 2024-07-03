@@ -98,15 +98,40 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', '商品が削除されました。');
     }
 
+public function edit($id)
+{
+    $product = Product::findOrFail($id);
+    $companies = Company::all();
+    return view('edit', compact('product', 'companies'));
+}
+
+public function update(ArticleRequest $request, $id)
+{
+    $product = Product::findOrFail($id);
+    $product->company_id = $request->input('company_id');
+    $product->product_name = $request->input('product_name');
+    $product->price = $request->input('price');
+    $product->stock = $request->input('stock');
+    $product->comment = $request->input('comment');
+    if ($request->hasFile('img_path')) {
+        $file = $request->file('img_path');
+        $fileName = time() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('images'), $fileName);
+        $product->img_path = 'images/' . $fileName;
+    }
+    $product->save();
+    return redirect()->route('products.index')->with('success', '商品情報を更新しました');
+}
+
+
+
     // 商品情報編集画面を表示するメソッド
-    public function edit($id)
+    /*public function edit($id)
     {
         $product = Product::findOrFail($id);
         $companies = Company::all();
         return view('edit', compact('product','companies'));
     }
-
-
 
     public function update(ArticleRequest $request, $id)
 {
@@ -133,7 +158,7 @@ class ProductController extends Controller
         // その他のエラーの処理
         dd($e->getMessage());
     }
-}
+}*/
 
 
 
