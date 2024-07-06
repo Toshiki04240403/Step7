@@ -47,29 +47,44 @@ class ProductController extends Controller
     }
 
 
+public function store(Request $request)
+{
+    // バリデーションルールを定義
+    $validatedData = $request->validate([
+        'company_id' => 'required|numeric',
+        'product_name' => 'required|max:255',
+        'price' => 'required|numeric|min:0',
+        'stock' => 'required|integer|min:0',
+        'comment' => 'nullable|max:1000',
+        'img_path' => 'nullable|image|max:2048'
+    ]);
 
-
-    public function store(ArticleRequest $request)
-    {
-        
-        $validatedData = $request->validated();
-
+    try {
         $product = new Product;
         $product->company_id = $validatedData['company_id'];
         $product->product_name = $validatedData['product_name'];
         $product->price = $validatedData['price'];
         $product->stock = $validatedData['stock'];
         $product->comment = $validatedData['comment'];
+
         if ($request->hasFile('img_path')) {
             $file = $request->file('img_path');
             $fileName = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('images'), $fileName);
             $product->img_path = 'images/' . $fileName;
         }
-        $product->save();
-        return redirect()->route('products.index')->with('success', '新しい商品を追加しました');
 
-        }
+        $product->save();
+    } catch (\Exception $e) {
+        // 例外が発生した場合の処理
+        return redirect()->back()->withErrors(['error' => 'データの保存に失敗しました。']);
+    }
+
+    return redirect()->route('products.index')->with('success', '新しい商品を追加しました');
+}
+
+
+        
 
         public function showSalesView()
         {
@@ -84,113 +99,64 @@ class ProductController extends Controller
     }
 
 
-        public function destroy($id)
+     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
-
-        return redirect()->route('products.index')->with('success', '商品が削除されました。');
-    }
-
-public function edit($id)
-{
-    $product = Product::findOrFail($id);
-    $companies = Company::all();
-    return view('edit', compact('product', 'companies'));
-}
-
-public function update(ArticleRequest $request, $id)
-{
-    $product = Product::findOrFail($id);
-    $product->company_id = $request->input('company_id');
-    $product->product_name = $request->input('product_name');
-    $product->price = $request->input('price');
-    $product->stock = $request->input('stock');
-    $product->comment = $request->input('comment');
-    if ($request->hasFile('img_path')) {
-        $file = $request->file('img_path');
-        $fileName = time() . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('images'), $fileName);
-        $product->img_path = 'images/' . $fileName;
-    }
-    $product->save();
-    return redirect()->route('products.index')->with('success', '商品情報を更新しました');
-}
-
-
-
-    // 商品情報編集画面を表示するメソッド
-    /*public function edit($id)
-    {
-        $product = Product::findOrFail($id);
-        $companies = Company::all();
-        return view('edit', compact('product','companies'));
-    }
-
-    public function update(ArticleRequest $request, $id)
-{
     try {
         $product = Product::findOrFail($id);
+        $product->delete();
+    } catch (\Exception $e) {
+        // 例外が発生した場合の処理
+        return redirect()->back()->withErrors(['error' => '商品の削除に失敗しました。']);
+    }
 
-        // 画像アップロードの処理
-        if ($request->hasFile('img_path')) {
-            $imagePath = $request->file('img_path')->store('images', 'public');
-            $product->img_path = $imagePath;
+    return redirect()->route('products.index')->with('success', '商品が削除されました。');
+    }
+
+
+    public function edit($id)
+        {
+            $product = Product::findOrFail($id);
+            $companies = Company::all();
+            return view('edit', compact('product', 'companies'));
         }
 
-        $product->fill($request->validated());
-        // company_idを設定
-        $product->company_id = $request->input('company_id');
+    public function update(Request $request, $id)
+    {
+    // バリデーションルールを定義
+    $validatedData = $request->validate([
+        'company_id' => 'required|numeric',
+        'product_name' => 'required|max:255',
+        'price' => 'required|numeric|min:0',
+        'stock' => 'required|integer|min:0',
+        'comment' => 'nullable|max:1000',
+        'img_path' => 'nullable|image|max:2048'
+    ]);
+
+    try {
+        $product = Product::findOrFail($id);
+        $product->company_id = $validatedData['company_id'];
+        $product->product_name = $validatedData['product_name'];
+        $product->price = $validatedData['price'];
+        $product->stock = $validatedData['stock'];
+        $product->comment = $validatedData['comment'];
+
+        if ($request->hasFile('img_path')) {
+            $file = $request->file('img_path');
+            $fileName = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images'), $fileName);
+            $product->img_path = 'images/' . $fileName;
+        }
 
         $product->save();
-
-        return redirect()->route('products.show', $product->id)->with('success', '商品情報を更新しました。');
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        // バリデーションエラーの処理
-        return redirect()->back()->withErrors($e->errors())->withInput();
     } catch (\Exception $e) {
-        // その他のエラーの処理
-        dd($e->getMessage());
+        // 例外が発生した場合の処理
+        return redirect()->back()->withErrors(['error' => 'データの更新に失敗しました。']);
     }
-}*/
 
+    return redirect()->route('products.index')->with('success', '商品情報を更新しました');
+    }
 
-
-
-
-
-
-
-    /*
-    public function update(ArticleRequest $request, $id)
-    {
-
-        // バリデーションデータの確認
-        dd($request->validated());
-        // バリデーション
-        //$validated = $request->validated();
-
-        // 商品を取得
-        $product = Product::findOrFail($id);
-        // データの更新
-        $product->update($validated);
-        
-
-        // 画像のアップロード処理
-        if ($request->hasFile('img_path')) {
-            $imgPath = $request->file('img_path')->store('imges', 'public');
-            $product->img_path = $imgPath;
-
-            // データベースに保存
-            $product->save();
-        }
-
-        
-
-        // リダイレクト
-        return redirect()->route('products.show', $product->id)->with('success', '商品情報を更新しました。');
-    }*/
-    
+  
 }
 
 

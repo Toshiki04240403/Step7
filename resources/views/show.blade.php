@@ -65,6 +65,10 @@
 
     <div class="product-info">
         <div>
+            <string>ID：</string>
+            <span>{{ $product->id }}</span>
+
+        <div>
             <strong>商品名：</strong>
             <span>{{ $product->product_name }}</span>
         </div>
