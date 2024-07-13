@@ -75,6 +75,16 @@
 <div class="container">
     <h2>商品新規登録画面</h2>
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('sales.index') }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="form-group">
@@ -91,7 +101,7 @@
         </div>
         <div class="form-group">
             <label for="price">価格：</label>
-            <input type="number" id="price" name="price" required>
+            <input  id="price" name="price" required>
         </div>
         <div class="form-group">
             <label for="stock">在庫数：</label>

@@ -70,6 +70,16 @@
 <div class="container">
     <h1>商品情報編集</h1>
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -98,7 +108,7 @@
         
         <div class="form-group">
             <label for="price">価格:</label>
-            <input type="number" id="price" name="price" value="{{ old('price', $product->price) }}">
+            <input  id="price" name="price" value="{{ old('price', $product->price) }}">
         </div>
         
         <div class="form-group">
