@@ -47,17 +47,11 @@ class ProductController extends Controller
     }
 
 
-public function store(Request $request)
+
+    public function store(ArticleRequest $request)
 {
-    // バリデーションルールを定義
-    $validatedData = $request->validate([
-        'company_id' => 'required|numeric',
-        'product_name' => 'required|max:255',
-        'price' => 'required|numeric|min:0',
-        'stock' => 'required|integer|min:0',
-        'comment' => 'nullable|max:1000',
-        'img_path' => 'nullable|image|max:2048'
-    ]);
+    // バリデーションは自動的に行われる
+    $validatedData = $request->validated();
 
     try {
         $product = new Product;
@@ -82,7 +76,6 @@ public function store(Request $request)
 
     return redirect()->route('products.index')->with('success', '新しい商品を追加しました');
 }
-
 
         
 
@@ -120,17 +113,10 @@ public function store(Request $request)
             return view('edit', compact('product', 'companies'));
         }
 
-    public function update(Request $request, $id)
-    {
-    // バリデーションルールを定義
-    $validatedData = $request->validate([
-        'company_id' => 'required|numeric',
-        'product_name' => 'required|max:255',
-        'price' => 'required|numeric|min:0',
-        'stock' => 'required|integer|min:0',
-        'comment' => 'nullable|max:1000',
-        'img_path' => 'nullable|image|max:2048'
-    ]);
+    public function update(ArticleRequest $request, $id)
+{
+    // バリデーションは自動的に行われる
+    $validatedData = $request->validated();
 
     try {
         $product = Product::findOrFail($id);
@@ -154,9 +140,6 @@ public function store(Request $request)
     }
 
     return redirect()->route('products.index')->with('success', '商品情報を更新しました');
-    }
-
-  
 }
 
-
+}
