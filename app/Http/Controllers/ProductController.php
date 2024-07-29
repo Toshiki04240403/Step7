@@ -9,33 +9,93 @@ use App\Http\Requests\ArticleRequest;
 
 class ProductController extends Controller
 {   
-
        
-       public function index(Request $request)
-    {
-        $search = $request->input('search');
-        $companyName = $request->input('company_id');
+    // ProductsController.php
+/*public function index(Request $request)
+{
+    $query = Product::query();
 
-        $query = Product::query();
-
-
-        if (isset($search)){
-            $query->where('product_name', 'like', '%'.$search. '%');
-        }
-
-        if (isset($companyName)) {
-            if ($companyName !== "all") {
-            $query->where('company_id', $companyName);
-            }
-        }
-
-        $products = $query->with('company')->orderBy('id', 'asc')->paginate(15);
-
-    
-        $companies = Company::pluck('company_name', 'id')->toArray();
-
-        return view('list', compact('products', 'companies'));
+    if ($request->has('search')) {
+        $query->where('product_name', 'like', '%' . $request->search . '%');
     }
+
+    if ($request->has('company_id')) {
+        $query->where('company_id', $request->company_id);
+    }
+
+    if ($request->has('sort')) {
+        $sortDirection = substr($request->sort, -4) === 'desc' ? 'desc' : 'asc';
+        $sortColumn = substr($request->sort, 0, -4);
+        $query->orderBy($sortColumn, $sortDirection);
+    }
+
+    $products = $query->paginate(10);
+    $companies = Company::pluck('company_name', 'id');
+
+    if ($request->ajax()) {
+        return response()->json([
+            'products' => $products->items(),
+            'companies' => $companies,
+        ]);
+    }
+
+    return view('list', compact('products', 'companies'));
+}*/
+
+public function index(Request $request)
+{
+    $query = Product::query();
+
+    // 商品名検索
+    if ($request->has('search')) {
+        $query->where('product_name', 'like', '%' . $request->search . '%');
+    }
+
+    // メーカー検索
+    if ($request->has('company_id') && $request->company_id != '') {
+        $query->where('company_id', $request->company_id);
+    }
+
+    // 価格検索
+    if ($request->has('max_price') && $request->max_price != '') {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    if ($request->has('min_price') && $request->min_price != '') {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    // 在庫検索
+    if ($request->has('max_stock') && $request->max_stock != '') {
+        $query->where('stock', '<=', $request->max_stock);
+    }
+
+    if ($request->has('min_stock') && $request->min_stock != '') {
+        $query->where('stock', '>=', $request->min_stock);
+    }
+
+    // ソート
+    if ($request->has('sort')) {
+        $sortDirection = substr($request->sort, -4) === 'desc' ? 'desc' : 'asc';
+        $sortColumn = substr($request->sort, 0, -4);
+        $query->orderBy($sortColumn, $sortDirection);
+    }
+
+    $products = $query->paginate(10);
+    $companies = Company::pluck('company_name', 'id');
+
+    if ($request->ajax()) {
+        return response()->json([
+            'products' => $products->items(),
+            'companies' => $companies,
+        ]);
+    }
+
+    return view('list', compact('products', 'companies'));
+}
+
+
+   
 
         public function create()
     {

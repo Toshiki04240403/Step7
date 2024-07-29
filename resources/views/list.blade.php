@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品一覧</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,34 +18,41 @@
             margin-top: 20px;
             color: #333;
         }
-        .search-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .search-container form {
-            margin: 0 10px;
-        }
-        .search-container input[type="text"],
-        .search-container select,
-        .search-container button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .search-container button {
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-        }
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
+    .search-container {
+        background-color: #f9f9f9; /* 背景色を薄いグレーに */
+        padding: 20px; /* 全体のパディングを追加 */
+        border-radius: 8px; /* 角を丸く */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
+    }
+
+    .search-container form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* フォーム要素間の間隔 */
+    }
+
+    .search-container input[type="text"],
+    .search-container input[type="number"],
+    .search-container select {
+        flex: 1; /* フォーム要素が均等に広がるように */
+        padding: 10px; /* 入力フィールドの内側パディング */
+        border: 1px solid #ccc; /* ボーダーの色 */
+        border-radius: 4px; /* 入力フィールドの角を丸く */
+    }
+
+    .search-container button {
+        flex: 0 1 auto; /* ボタンのサイズを自動調整 */
+        padding: 10px 20px; /* ボタンの内側パディング */
+        background-color: #007bff; /* ボタンの背景色 */
+        color: white; /* ボタンの文字色 */
+        border: none; /* ボーダーを無くす */
+        border-radius: 4px; /* ボタンの角を丸く */
+        cursor: pointer; /* カーソルをポインターに */
+    }
+
+    .search-container button:hover {
+        background-color: #0056b3; /* ボタンのホバー時の色 */
+    }
         table {
             width: 90%;
             margin: 20px auto;
@@ -92,7 +101,7 @@
 <body>
     <h1>商品一覧</h1>
 
-     <div class="search-container">
+    <div class="search-container">
         <form action="{{ route('products.index') }}" method="GET">
             <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
             <select name="company_id">
@@ -103,6 +112,11 @@
                 </option>
                 @endforeach
             </select>
+            <input type="number" name="max_price" placeholder="価格上限" value="{{ request('max_price') }}">
+            <input type="number" name="min_price" placeholder="価格下限" value="{{ request('min_price') }}">
+            <input type="number" name="max_stock" placeholder="在庫上限" value="{{ request('max_stock') }}">
+            <input type="number" name="min_stock" placeholder="在庫下限" value="{{ request('min_stock') }}">
+            
             <button type="submit">検索</button>
         </form>
     </div>
@@ -113,8 +127,12 @@
                 <th>ID</th>
                 <th>商品画像</th>
                 <th>商品名</th>
-                <th>価格</th>
-                <th>在庫数</th>
+                <th>
+                    <button class="sort-button" data-sort="price_asc">価格</button>
+                </th>
+                <th>
+                    <button class="sort-button" data-sort="stock_asc">在庫数</button>
+                </th>
                 <th>メーカー</th>
                 <th><form action="{{ route('sales.index') }}" method="GET" style="display:inline;">
                         <button type="submit" class="new-registration">新規登録</button>
@@ -122,7 +140,6 @@
             </tr>
         </thead>
         <tbody>
-            
             @foreach ($products as $product)
                 <tr>
                     <td>{{ $product->id }}</td>
@@ -141,8 +158,10 @@
                     </td>
                 </tr>
             @endforeach
-
         </tbody>
     </table>
+
+    <!-- 必要なスクリプトの読み込み -->
+    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
