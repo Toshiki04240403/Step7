@@ -2,10 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>商品一覧</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ asset('js/app.js') }}"></script>
+   
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,41 +19,39 @@
             margin-top: 20px;
             color: #333;
         }
-    .search-container {
-        background-color: #f9f9f9; /* 背景色を薄いグレーに */
-        padding: 20px; /* 全体のパディングを追加 */
-        border-radius: 8px; /* 角を丸く */
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
-    }
-
-    .search-container form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px; /* フォーム要素間の間隔 */
-    }
-
-    .search-container input[type="text"],
-    .search-container input[type="number"],
-    .search-container select {
-        flex: 1; /* フォーム要素が均等に広がるように */
-        padding: 10px; /* 入力フィールドの内側パディング */
-        border: 1px solid #ccc; /* ボーダーの色 */
-        border-radius: 4px; /* 入力フィールドの角を丸く */
-    }
-
-    .search-container button {
-        flex: 0 1 auto; /* ボタンのサイズを自動調整 */
-        padding: 10px 20px; /* ボタンの内側パディング */
-        background-color: #007bff; /* ボタンの背景色 */
-        color: white; /* ボタンの文字色 */
-        border: none; /* ボーダーを無くす */
-        border-radius: 4px; /* ボタンの角を丸く */
-        cursor: pointer; /* カーソルをポインターに */
-    }
-
-    .search-container button:hover {
-        background-color: #0056b3; /* ボタンのホバー時の色 */
-    }
+        .search-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            margin: 20px auto;
+        }
+        .search-container form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .search-container input[type="text"],
+        .search-container input[type="number"],
+        .search-container select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-container button {
+            flex: 0 1 auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
         table {
             width: 90%;
             margin: 20px auto;
@@ -96,6 +95,14 @@
         form.inline {
             display: inline;
         }
+
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +115,7 @@
                 <option value="">全てのメーカー</option>
                 @foreach ($companies as $id => $company_name)
                 <option value="{{ $id }}" {{ request('company_id') == $id ? 'selected' : '' }}>
-                {{ $company_name }}
+                    {{ $company_name }}
                 </option>
                 @endforeach
             </select>
@@ -127,12 +134,8 @@
                 <th>ID</th>
                 <th>商品画像</th>
                 <th>商品名</th>
-                <th>
-                    <button class="sort-button" data-sort="price_asc">価格</button>
-                </th>
-                <th>
-                    <button class="sort-button" data-sort="stock_asc">在庫数</button>
-                </th>
+                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'price', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}">価格</a></th>
+                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'stock', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}">在庫数</a></th>
                 <th>メーカー</th>
                 <th><form action="{{ route('sales.index') }}" method="GET" style="display:inline;">
                         <button type="submit" class="new-registration">新規登録</button>
@@ -141,27 +144,130 @@
         </thead>
         <tbody>
             @foreach ($products as $product)
-                <tr>
+                <tr id="product-{{ $product->id }}">
                     <td>{{ $product->id }}</td>
                     <td><img src="{{ $product->img_path }}" alt="商品画像" width="50"></td>
                     <td>{{ $product->product_name }}</td>
                     <td>{{ $product->price }}円</td>
                     <td>{{ $product->stock }}本</td>
                     <td>{{ $product->company->company_name }}</td>
-                    <td>
+                     <td>
                         <button class="details" onclick="location.href='{{ url('/products/' . $product->id) }}'">詳細</button>
-                        <form class="inline" action="{{ route('products.destroy', $product->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button class="delete" type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
-                        </form>
-                    </td>
+                        <button class="delete" data-id="{{ $product->id }}">削除</button>
+                </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
+    
 
-    <!-- 必要なスクリプトの読み込み -->
-    <script src="{{ asset('js/app.js') }}"></script>
+
+<script>
+$(document).ready(function () {
+    let sortDirection = 'asc';
+
+    // CSRFトークンをすべてのAjaxリクエストに含める設定
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // 並べ替えボタンのクリックイベント
+    $(document).on('click', '.sort-button', function () {
+        let sortParam = $(this).data('sort');
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+
+        $.ajax({
+            url: productIndexUrl, // 予め定義されたURL変数を使います
+            type: 'GET',
+            data: {
+                sort: sortParam,
+                direction: sortDirection,
+                // 他の検索条件が必要ならここに追加
+            },
+            success: function (response) {
+                $('table tbody').html('');
+
+                $.each(response.products, function (index, product) {
+                    let row = `
+                        <tr id="product-${product.id}">
+                            <td>${product.id}</td>
+                            <td><img src="${product.img_path}" alt="商品画像" width="50"></td>
+                            <td>${product.product_name}</td>
+                            <td>${product.price}円</td>
+                            <td>${product.stock}本</td>
+                            <td>${response.companies[product.company_id]}</td>
+                            <td>
+                                <button class="details" onclick="location.href='/products/${product.id}'">詳細</button>
+                                <form class="inline" action="/products/${product.id}" method="POST">
+                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button class="delete" type="submit" data-id="${product.id}">削除</button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                    $('table tbody').append(row);
+                });
+            }
+        });
+    });
+});
+    </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function () {
+        // CSRFトークンをすべてのAjaxリクエストに含める設定
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // 削除ボタンのクリックイベント
+        $('.delete').click(function () {
+            var productId = $(this).data('id');
+
+            if (confirm('本当に削除しますか？')) {
+                $.ajax({
+                    url: '/products/' + productId,
+                    type: 'DELETE',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#product-' + productId).remove();
+                            alert(response.success);
+                        } else {
+                            alert('商品の削除に失敗しました。');
+                        }
+                    },
+                    error: function () {
+                        alert('商品の削除に失敗しました。');
+                    }
+                });
+            }
+        });
+    });
+    </script>
+
+    <script>
+    function showNotification(message, type) {
+        var notification = $('<div class="notification alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+            message +
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+            '<span aria-hidden="true">&times;</span>' +
+            '</button>' +
+            '</div>');
+        $('body').append(notification);
+        notification.fadeIn();
+
+        setTimeout(function () {
+            notification.fadeOut(function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+    </script>
+
 </body>
 </html>

@@ -15,8 +15,6 @@ use App\Http\Controllers\ProductController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-//リソースルートの定義
-Route::resource('products', ProductController::class);
 
 Route::get('/products/{id}/edit', 'ProductController@edit')->name('products.edit');
 Route::put('/products/{id}', 'ProductController@update')->name('products.update');
@@ -24,6 +22,8 @@ Route::put('/products/{id}', 'ProductController@update')->name('products.update'
 
 // 商品リストの表示
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+
+Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
 // 販売ページの表示
 Route::get('/sales', [ProductController::class, 'showsales'])->name('sales.index');

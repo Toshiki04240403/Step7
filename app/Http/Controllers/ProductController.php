@@ -8,91 +8,45 @@ use App\Models\Company;
 use App\Http\Requests\ArticleRequest;
 
 class ProductController extends Controller
-{   
-       
-    // ProductsController.php
-/*public function index(Request $request)
 {
-    $query = Product::query();
+    public function index(Request $request)
+    {
+        $products = Product::query();
 
-    if ($request->has('search')) {
-        $query->where('product_name', 'like', '%' . $request->search . '%');
-    }
+        // 検索条件の追加
+        if ($request->has('search')) {
+            $products->where('product_name', 'like', '%' . $request->search . '%');
+        }
+        if ($request->has('company_id') && $request->company_id != '') {
+            $products->where('company_id', $request->company_id);
+        }
+        if ($request->has('max_price') && $request->max_price != '') {
+            $products->where('price', '<=', $request->max_price);
+        }
+        if ($request->has('min_price') && $request->min_price != '') {
+            $products->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_stock') && $request->max_stock != '') {
+            $products->where('stock', '<=', $request->max_stock);
+        }
+        if ($request->has('min_stock') && $request->min_stock != '') {
+            $products->where('stock', '>=', $request->min_stock);
+        }
 
-    if ($request->has('company_id')) {
-        $query->where('company_id', $request->company_id);
-    }
+        // ソートのパラメータが指定されている場合、そのカラムでソートを行う
+        if($sort = $request->sort){
+        $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
+        $products->orderBy($sort, $direction);
+        }
 
-    if ($request->has('sort')) {
-        $sortDirection = substr($request->sort, -4) === 'desc' ? 'desc' : 'asc';
-        $sortColumn = substr($request->sort, 0, -4);
-        $query->orderBy($sortColumn, $sortDirection);
-    }
+        $query = $products->paginate(10);
 
-    $products = $query->paginate(10);
-    $companies = Company::pluck('company_name', 'id');
+        // 企業情報を取得
+        $companies = Company::pluck('company_name', 'id');
+        
 
-    if ($request->ajax()) {
-        return response()->json([
-            'products' => $products->items(),
-            'companies' => $companies,
-        ]);
-    }
-
-    return view('list', compact('products', 'companies'));
-}*/
-
-public function index(Request $request)
-{
-    $query = Product::query();
-
-    // 商品名検索
-    if ($request->has('search')) {
-        $query->where('product_name', 'like', '%' . $request->search . '%');
-    }
-
-    // メーカー検索
-    if ($request->has('company_id') && $request->company_id != '') {
-        $query->where('company_id', $request->company_id);
-    }
-
-    // 価格検索
-    if ($request->has('max_price') && $request->max_price != '') {
-        $query->where('price', '<=', $request->max_price);
-    }
-
-    if ($request->has('min_price') && $request->min_price != '') {
-        $query->where('price', '>=', $request->min_price);
-    }
-
-    // 在庫検索
-    if ($request->has('max_stock') && $request->max_stock != '') {
-        $query->where('stock', '<=', $request->max_stock);
-    }
-
-    if ($request->has('min_stock') && $request->min_stock != '') {
-        $query->where('stock', '>=', $request->min_stock);
-    }
-
-    // ソート
-    if ($request->has('sort')) {
-        $sortDirection = substr($request->sort, -4) === 'desc' ? 'desc' : 'asc';
-        $sortColumn = substr($request->sort, 0, -4);
-        $query->orderBy($sortColumn, $sortDirection);
-    }
-
-    $products = $query->paginate(10);
-    $companies = Company::pluck('company_name', 'id');
-
-    if ($request->ajax()) {
-        return response()->json([
-            'products' => $products->items(),
-            'companies' => $companies,
-        ]);
-    }
-
-    return view('list', compact('products', 'companies'));
-}
+         return view('list', ['products' => $query, 'companies' => $companies]);
+        }
 
 
    
@@ -152,18 +106,18 @@ public function index(Request $request)
     }
 
 
-     public function destroy($id)
-    {
+     
+ public function destroy($id)
+{
     try {
         $product = Product::findOrFail($id);
         $product->delete();
+        return response()->json(['success' => '商品が削除されました。']);
     } catch (\Exception $e) {
-        // 例外が発生した場合の処理
-        return redirect()->back()->withErrors(['error' => '商品の削除に失敗しました。']);
+        return response()->json(['error' => '商品の削除に失敗しました。'], 500);
     }
+}
 
-    return redirect()->route('products.index')->with('success', '商品が削除されました。');
-    }
 
 
     public function edit($id)
