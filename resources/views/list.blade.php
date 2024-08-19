@@ -153,8 +153,8 @@
                     <td>{{ $product->company->company_name }}</td>
                      <td>
                         <button class="details" onclick="location.href='{{ url('/products/' . $product->id) }}'">詳細</button>
-                        <button class="delete" data-id="{{ $product->id }}">削除</button>
-                </td>
+                       <button class="delete" data-id="{{ $product->id }}" data-url="{{ route('products.destroy', $product->id) }}">削除</button>
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -212,43 +212,44 @@ $(document).ready(function () {
                 });
             }
         });
+     });
     });
+</script>
+   
+
+<script>
+$(document).on('click', '.delete', function () {
+    var productId = $(this).data('id');
+    var deleteUrl = $(this).data('url');
+
+    if (confirm('本当にこの商品を削除しますか？')) {
+        $.ajax({
+            url: deleteUrl,
+            type: 'POST', // POSTメソッドを使用
+            data: {
+                _method: 'DELETE', // _methodでDELETEを指定
+                _token: '{{ csrf_token() }}' // CSRFトークンを含める
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#product-' + productId).remove();
+                    alert('商品が削除されました。');
+                } else {
+                    alert('商品の削除に失敗しました。');
+                }
+            },
+            error: function (xhr) {
+                // エラーメッセージを明確に
+                if (xhr.status === 404) {
+                    alert('商品が見つかりませんでした。');
+                } else {
+                    alert('削除処理中にエラーが発生しました。');
+                }
+            }
+        });
+    }
 });
-    </script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-    $(document).ready(function () {
-        // CSRFトークンをすべてのAjaxリクエストに含める設定
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        // 削除ボタンのクリックイベント
-        $('.delete').click(function () {
-            var productId = $(this).data('id');
-
-            if (confirm('本当に削除しますか？')) {
-                $.ajax({
-                    url: '/products/' + productId,
-                    type: 'DELETE',
-                    success: function (response) {
-                        if (response.success) {
-                            $('#product-' + productId).remove();
-                            alert(response.success);
-                        } else {
-                            alert('商品の削除に失敗しました。');
-                        }
-                    },
-                    error: function () {
-                        alert('商品の削除に失敗しました。');
-                    }
-                });
-            }
-        });
-    });
-    </script>
+</script>
 
     <script>
     function showNotification(message, type) {
