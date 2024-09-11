@@ -107,6 +107,7 @@
 </head>
 <body>
     <h1>商品一覧</h1>
+   
 
     <div class="search-container">
         <form action="{{ route('products.index') }}" method="GET">
@@ -159,7 +160,58 @@
             @endforeach
         </tbody>
     </table>
+
+        <script>
+        function purchaseProduct(productId) {
+            const quantity = 1; // 購入する数量を設定（ここでは1固定）
+
+            $.ajax({
+                url: 'api/purchase',
+                type: 'POST',
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    alert(response.success);
+                    location.reload();
+                },
+                error: function(response) {
+                    alert(response.responseJSON.error);
+                }
+            });
+        }
+    </script>
+
     
+   <script>
+        function purchaseProduct(productId, quantity) {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('/purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 
 
 <script>

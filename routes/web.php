@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController; 
 use App\Http\Controllers\ProductController;
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,6 +18,7 @@ use App\Http\Controllers\ProductController;
 |
 */
 
+
 Route::get('/products/{id}/edit', 'ProductController@edit')->name('products.edit');
 Route::put('/products/{id}', 'ProductController@update')->name('products.update');
 
@@ -23,7 +26,7 @@ Route::put('/products/{id}', 'ProductController@update')->name('products.update'
 // 商品リストの表示
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-Route::post('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+Route::DELETE('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
 // 販売ページの表示
 Route::get('/sales', [ProductController::class, 'showsales'])->name('sales.index');
