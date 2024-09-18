@@ -160,6 +160,33 @@
             @endforeach
         </tbody>
     </table>
+ <script>
+        $(document).ready(function () {
+    // 検索ボタンのクリックイベント
+    $('#search-button').on('click', function () {
+        // 検索フォームの値を取得
+        const searchQuery = $('#search-query').val();
+
+        // 非同期通信で商品一覧を取得
+        $.ajax({
+            url: '/products',
+            type: 'GET',
+            data: {
+                search: searchQuery
+            },
+            success: function (response) {
+                // 取得した商品一覧をリストに反映
+                $('#product-list').html(response);
+            },
+            error: function (error) {
+                // エラー処理
+                console.error(error);
+            }
+        });
+    });
+});
+ </script>
+
 
         <script>
         function purchaseProduct(productId) {
