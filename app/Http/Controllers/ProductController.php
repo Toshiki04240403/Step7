@@ -14,8 +14,8 @@ class ProductController extends Controller
         $products = Product::query();
 
         // 検索条件の追加
-        if ($request->has('search')) {
-            $products->where('product_name', 'like', '%' . $request->search . '%');
+        if ($request->search) {
+        $query->where('product_name', 'like', '%' . $request->search . '%');
         }
         if ($request->has('company_id') && $request->company_id != '') {
             $products->where('company_id', $request->company_id);
@@ -33,12 +33,16 @@ class ProductController extends Controller
             $products->where('stock', '>=', $request->min_stock);
         }
 
-        // ソートのパラメータが指定されている場合、そのカラムでソートを行う
-        if($sort = $request->sort){
-        $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
-        $products->orderBy($sort, $direction);
+         // ソートのパラメータが指定されている場合、そのカラムでソートを行う
+        if ($sort = $request->sort) {
+            $direction = $request->direction == 'desc' ? 'desc' : 'asc';
+            $products->orderBy($sort, $direction);
+        } else {
+            $products->orderBy('id', 'desc');
         }
 
+        
+       
         $query = $products->paginate(10);
 
         // 企業情報を取得
