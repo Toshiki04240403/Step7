@@ -15,7 +15,7 @@ class ProductController extends Controller
 
         // 検索条件の追加
         if ($request->search) {
-        $query->where('product_name', 'like', '%' . $request->search . '%');
+        $products->where('product_name', 'like', '%' . $request->search . '%');
         }
         if ($request->has('company_id') && $request->company_id != '') {
             $products->where('company_id', $request->company_id);
@@ -43,13 +43,13 @@ class ProductController extends Controller
 
         
        
-        $query = $products->paginate(10);
+         $products = $products->paginate(10);
 
         // 企業情報を取得
         $companies = Company::pluck('company_name', 'id');
         
 
-         return view('list', ['products' => $query, 'companies' => $companies]);
+         return view('list', ['products' => $products, 'companies' => $companies]);
         }
 
 

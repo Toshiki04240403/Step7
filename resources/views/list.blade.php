@@ -6,7 +6,9 @@
     <title>商品一覧</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tablesorter/2.31.3/css/theme.default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +22,7 @@
             color: #333;
         }
         .search-container {
-            background-color: #f9f9f9;
+            background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -92,137 +94,137 @@
         button:hover {
             opacity: 0.8;
         }
-        form.inline {
-            display: inline;
-        }
-
-        .notification {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
     </style>
 </head>
-<h1>商品一覧</h1>
+<body>
+    <h1>商品一覧</h1>
 
-    <div class="search-container">
-        <form id="search-query" method="GET">
-            <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
-            <select name="company_id">
-                <option value="">全てのメーカー</option>
-                @foreach ($companies as $id => $company_name)
-                <option value="{{ $id }}" {{ request('company_id') == $id ? 'selected' : '' }}>
-                    {{ $company_name }}
-                </option>
-                @endforeach
-            </select>
-            <input type="number" name="max_price" placeholder="価格上限" value="{{ request('max_price') }}">
-            <input type="number" name="min_price" placeholder="価格下限" value="{{ request('min_price') }}">
-            <input type="number" name="max_stock" placeholder="在庫上限" value="{{ request('max_stock') }}">
-            <input type="number" name="min_stock" placeholder="在庫下限" value="{{ request('min_stock') }}">
-            
-            <button type="button" id="search-button">検索</button>
-        </form>
-    </div>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>商品画像</th>
-                <th>商品名</th>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'price', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}">価格</a></th>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'stock', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}">在庫数</a></th>
-                <th>メーカー</th>
-                <th>
-                    <form action="{{ route('sales.index') }}" method="GET" style="display:inline;">
-                        <button type="submit" class="new-registration">新規登録</button>
-                    </form>
-                </th>
-            </tr>
-        </thead>
-        <tbody id="product-list">
-            @foreach ($products as $product)
-                <tr id="product-{{ $product->id }}">
-                    <td>{{ $product->id }}</td>
-                    <td><img src="{{ $product->img_path }}" alt="商品画像" width="50"></td>
-                    <td>{{ $product->product_name }}</td>
-                    <td>{{ $product->price }}円</td>
-                    <td>{{ $product->stock }}本</td>
-                    <td>{{ $product->company->company_name }}</td>
-                    <td>
-                        <button class="details" onclick="location.href='{{ url('/products/' . $product->id) }}'">詳細</button>
-                        <button class="delete" data-id="{{ $product->id }}" data-url="{{ route('products.destroy', $product->id) }}">削除</button>
-                    </td>
-                </tr>
+<div class="search-container">
+    <form id="search-query" method="GET">
+        <input type="text" name="search" placeholder="商品名で検索" value="{{ request('search') }}">
+        <select name="company_id">
+            <option value="">全てのメーカー</option>
+            @foreach ($companies as $id => $company_name)
+            <option value="{{ $id }}" {{ request('company_id') == $id ? 'selected' : '' }}>
+                {{ $company_name }}
+            </option>
             @endforeach
-        </tbody>
-    </table>
+        </select>
+        <input type="number" name="max_price" placeholder="価格上限" value="{{ request('max_price') }}">
+        <input type="number" name="min_price" placeholder="価格下限" value="{{ request('min_price') }}">
+        <input type="number" name="max_stock" placeholder="在庫上限" value="{{ request('max_stock') }}">
+        <input type="number" name="min_stock" placeholder="在庫下限" value="{{ request('min_stock') }}">
+        <button type="button" id="search-button">検索</button>
+    </form>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            // 検索ボタンのクリックイベント
-            $('#search-button').on('click', function () {
-                const formData = $('#search-query').serialize();
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th><a href="#" class="sort-link" data-sort="id">ID</a></th>
+            <th>商品画像</th>
+            <th>商品名</th>
+            <th><a href="#" class="sort-link" data-sort="price">価格</a></th>
+            <th><a href="#" class="sort-link" data-sort="stock">在庫数</a></th>
+            <th>メーカー</th>
+            <th>
+                <form action="{{ route('sales.index') }}" method="GET" style="display:inline;">
+                    <button type="submit" class="new-registration">新規登録</button>
+                </form>
+            </th>
+        </tr>
+    </thead>
+    <tbody id="product-list">
+        @foreach ($products as $product)
+            <tr id="product-{{ $product->id }}">
+                <td>{{ $product->id }}</td>
+                <td><img src="{{ $product->img_path }}" alt="商品画像" width="50"></td>
+                <td>{{ $product->product_name }}</td>
+                <td>{{ $product->price }}円</td>
+                <td>{{ $product->stock }}本</td>
+                <td>{{ $product->company->company_name }}</td>
+                <td>
+                    <button class="details" onclick="location.href='{{ url('/products/' . $product->id) }}'">詳細</button>
+                    <button class="delete" data-id="{{ $product->id }}" data-url="{{ route('products.destroy', $product->id) }}">削除</button>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
 
-                $.ajax({
-                    url: '{{ route('products.index') }}',
-                    type: 'GET',
-                    data: formData,
-                    success: function (response) {
-                        $('#product-list').html($(response).find('#product-list').html());
-                    },
-                    error: function (error) {
-                        console.error(error);
-                    }
-                });
-            });
+{{ $products->links() }}
 
-             // ソートリンクのクリックイベント
-            $('.sort').on('click', function (e) {
-                e.preventDefault();
-                const sort = $(this).data('sort');
-                const direction = $(this).data('direction') === 'asc' ? 'desc' : 'asc';
-                $(this).data('direction', direction);
+<script>
+    $(document).ready(function () {
+        let currentSort = "{{ request('sort', 'id') }}"; // 初期はID
+        let currentDirection = "{{ request('direction', 'desc') }}"; // 初期は降順
 
-                const formData = $('#search-query').serialize() + `&sort=${sort}&direction=${direction}`;
+        // 検索ボタンのクリックイベント
+        $('#search-button').on('click', function () {
+            performSearch();
+        });
 
-                $.ajax({
-                    url: '{{ route('products.index') }}',
-                    type: 'GET',
-                    data: formData,
-                    success: function (response) {
-                        $('#product-list').html($(response).find('#product-list').html());
-                    },
-                    error: function (error) {
-                        console.error(error);
-                    }
-                });
-            });
+        // ソートリンクのクリックイベント
+        $(document).on('click', '.sort-link', function (e) {
+            e.preventDefault();
+            const sort = $(this).data('sort');
 
-            // 削除ボタンのクリックイベント
-            $(document).on('click', '.delete', function () {
-                const id = $(this).data('id');
-                const url = $(this).data('url');
+            if (currentSort === sort) {
+                currentDirection = currentDirection === 'asc' ? 'desc' : 'asc'; // 切り替え
+            } else {
+                currentSort = sort;
+                currentDirection = 'asc'; // 新しいソートカラムで昇順
+            }
 
-                $.ajax({
-                    url: url,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function () {
-                        $(`#product-${id}`).remove();
-                    },
-                    error: function (error) {
-                        console.error(error);
-                    }
-                });
+            performSearch();
+        });
+
+        // 削除ボタンのクリックイベント
+        $(document).on('click', '.delete', function () {
+            const id = $(this).data('id');
+            const url = $(this).data('url');
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function () {
+                    $(`#product-${id}`).remove();
+                },
+                error: function (error) {
+                    console.error(error);
+                }
             });
         });
-    </script>
+
+        // 検索を実行する関数
+        function performSearch() {
+            const formData = $('#search-query').serializeArray();
+            formData.push({ name: 'sort', value: currentSort });
+            formData.push({ name: 'direction', value: currentDirection });
+
+            $.ajax({
+                url: "{{ route('products.index') }}",
+                method: "GET",
+                data: $.param(formData),
+                success: function (response) {
+                    $('#product-list').html($(response).find('#product-list').html());
+                    $(".tablesorter").trigger("update");
+                },
+                error: function (xhr) {
+                    alert('検索に失敗しました。');
+                }
+            });
+        }
+
+        // 初期ソート設定
+        $(".tablesorter").tablesorter({
+            sortList: [[0, 1]] // 初期表示はIDの降順
+        });
+    });
+</script>
 
 
         <script>
